@@ -1,0 +1,157 @@
+---
+title: "Stroke Detection"
+author: "Adnan Hakim, Arsh Shaikh, Hussain Sadriwalla"
+date: "17/04/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Packages
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r}
+library(tidyverse)
+library(naniar)
+library(caTools)
+library(superheat)
+library(scatterplot3d)
+library(ROCR)
+```
+
+## Dataset
+
+You can also embed plots, for example:
+
+```{r}
+data = read.csv("stroke_data.csv")
+str(data)
+glimpse(data)
+```
+
+## Data Preprocessing
+### Checking dataset values
+
+```{r}
+unique(data $ gender)
+unique(data $ ever_married) 
+unique(data $ Residence_type)
+unique(data $ smoking_status)
+```
+
+### Converting character values to numeric values
+
+```{r}
+clean_data <- data %>% mutate(gender = if_else(gender == "Female", 0, if_else(gender == "Male", 1, 2)), ever_married = if_else(ever_married == "Yes", 1, 0), Residence_type = if_else(Residence_type == "Rural", 0, 1), smoking_status = if_else(smoking_status == "never smoked", 0, if_else(smoking_status == "formerly smoked", 1, if_else(smoking_status == "smokes", 2, 3))))
+summary(clean_data)
+```
+
+### Handling missing values
+
+```{r}
+miss_scan_count(data = data, search = list("N/A", "Unknown"))
+```
+
+```{r}
+clean_data <- replace_with_na(data = clean_data, replace = list(bmi = c("N/A"), smoking_status = c(3))) %>% mutate(bmi = as.numeric(bmi))
+summary(clean_data)
+```
+
+### Plotting a heatmap
+
+```{r}
+superheat(subset(clean_data, select = -c(stroke)), scale = TRUE, bottom.label.size = 0.5, bottom.label.text.angle = 90, bottom.label.text.size = 3)
+```
+
+## Logistic Regression
+```{r}
+set.seed(99)
+split = sample.split(clean_data $ stroke, SplitRatio = 0.7)
+train = subset(clean_data, split == TRUE)
+test = subset(clean_data, split == FALSE)
+logistic_regression_1 = glm(stroke~., data = train, family = 'binomial')
+summary(logistic_regression_1)
+```
+
+```{r}
+logistic_regression_2 = glm(stroke ~ gender + age + hypertension + heart_disease + ever_married + avg_glucose_level +bmi + smoking_status, data = train, family = 'binomial')
+summary(logistic_regression_2)
+```
+
+```{r}
+logistic_regression_2 = glm(stroke ~ age + hypertension + heart_disease + ever_married + avg_glucose_level + bmi + smoking_status, data = train, family = 'binomial')
+summary(logistic_regression_2)
+```
+
+```{r}
+logistic_regression_2 = glm(stroke ~ age + hypertension + heart_disease + ever_married + avg_glucose_level + smoking_status, data = train, family = 'binomial')
+summary(logistic_regression_2)
+```
+
+```{r}
+logistic_regression_2 = glm(stroke ~ age + hypertension + ever_married + avg_glucose_level + smoking_status, data = train, family = 'binomial')
+summary(logistic_regression_2)
+```
+
+```{r}
+logistic_regression_2 = glm(stroke ~ age + hypertension + avg_glucose_level + smoking_status, data = train, family = 'binomial')
+summary(logistic_regression_2)
+```
+
+```{r}
+logistic_regression_2 = glm(stroke ~ age + hypertension + avg_glucose_level, data = train, family = 'binomial')
+summary(logistic_regression_2)
+```
+
+### Training model
+
+```{r}
+predict_train = predict(logistic_regression_2, type = 'response')
+table(train $ stroke, predict_train>0.2)
+```
+
+### Accuracy on training set
+
+```{r}
+(3274 + 38) / nrow(train)
+```
+
+### Testing model
+
+```{r}
+predict_test = predict(logistic_regression_2, newdata = test, type = 'response')
+table(test $ stroke, predict_test>0.2)
+```
+
+### Accuracy on testing set
+
+```{r}
+(1414 + 18) / nrow(test)
+```
+
+## Plotting results
+
+### ROCR Curve
+
+```{r}
+rocr_prediction = prediction(predict_test, test $ stroke)
+auc = as.numeric(performance(rocr_prediction, 'auc') @ y.values)
+auc
+```
+
+```{r}
+rocr_performance = performance(rocr_prediction, 'tpr','fpr')
+plot(rocr_performance, colorize = TRUE, main = 'ROCR Curve')
+```
+
+### 3D Scatterplot
+
+```{r}
+with(clean_data, {scatterplot3d(x = age,  y = hypertension, z = avg_glucose_level, main = "Stroke Detection Scatterplot")})
+```
+
