@@ -1,13 +1,11 @@
 ---
-title: "Stroke Detection"
+title: "Stroke Prediction"
 author: "Adnan Hakim, Arsh Shaikh, Hussain Sadriwalla"
 date: "17/04/2021"
 output: html_document
 knit: (function(input_file, encoding) {
   out_dir <- 'docs';
-  rmarkdown::render(input_file,
- encoding=encoding,
- output_file=file.path(dirname(input_file), out_dir, 'index.html'))})
+  rmarkdown::render(input_file, encoding = encoding, output_file = file.path(dirname(input_file), out_dir, 'index.html'))})
 ---
 
 ```{r setup, include=FALSE}
@@ -30,7 +28,7 @@ library(ROCR)           # Creating cutoff-parameterized 2D performance curves
 
 According to the World Health Organization (WHO) stroke is the 2nd leading cause of death globally, responsible for approximately 11% of total deaths. This dataset is used to predict whether a patient is likely to get stroke based on the input parameters like gender, age, various diseases, and smoking status. Each row in the data provides relavant information about the patient. 
 
-The dataset can be found in the [repository](https://github.com/adnanhakim/stroke-detection) or can be downloaded from [Kaggle](https://www.kaggle.com/fedesoriano/stroke-prediction-dataset)
+The dataset can be found in the [repository](https://github.com/adnanhakim/stroke-prediction) or can be downloaded from [Kaggle](https://www.kaggle.com/fedesoriano/stroke-prediction-dataset)
 
 ```{r}
 data = read.csv("stroke_data.csv")
@@ -99,6 +97,25 @@ We see that the missingness doesn't show clear association with other variables 
 
 ```{r}
 ggplot(clean_data, aes(x = bmi)) + geom_density(color="black", fill="lightblue") + labs(title = "Distribution of BMI") 
+```
+
+#### Gender Distribution
+
+```{r}
+ggplot(data, aes(x = factor(gender), fill = factor(gender))) + geom_bar() + theme_classic()
+```
+
+#### Age and BMI wrt stroke
+
+```{r}
+ggplot(clean_data, aes(x = age, y = bmi, color = stroke)) + geom_point() + scale_color_gradient(low = "lightblue", high = "red")
+```
+
+
+#### Avg Glucose Level with stroke
+
+```{r}
+ggplot(clean_data, aes(x = stroke, y = avg_glucose_level, group = stroke, fill = stroke)) + geom_boxplot()
 ```
 
 ## Logistic Regression
@@ -199,6 +216,6 @@ plot(rocr_performance, colorize = TRUE, main = 'ROCR Curve')
 ### 3D Scatterplot
 
 ```{r}
-with(clean_data, {scatterplot3d(x = age,  y = hypertension, z = avg_glucose_level, main = "Stroke Detection Scatterplot")})
+with(clean_data, {scatterplot3d(x = age,  y = hypertension, z = avg_glucose_level, main = "Stroke Prediction Scatterplot", xlab = "Age", ylab = "Hypertension", zlab = "Average Glucose Level")})
 ```
 
