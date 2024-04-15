@@ -49,3 +49,42 @@ summary(clean_data)
 #summarizing data after preprocessing
 
 summary(clean_data)
+
+
+
+# Calculate Entropy for Each Column in clean_data (data after preprocessing)
+
+entropy_values <- sapply(clean_data, function(col) entropy(col))
+
+
+# Calculate Variance for Each Column in clean_data (data after preprocessing)
+
+variance_values <- sapply(clean_data, function(col) var(col))
+
+# Calculate Standard Deviation for Each Column in clean_data (data after preprocessing)
+
+std_deviation_values <- sapply(clean_data, function(col) sd(col))
+
+# Calculate Impurity for Each Column in clean_data (data after preprocessing)
+
+impurity_values <- sapply(clean_data, function(col) entropy(col))
+
+
+# Print Results
+
+cat("Entropy values for each column:\n")
+
+print(entropy_values)
+
+cat("\nVariance for each column:\n")
+
+print(variance_values)
+
+cat("\nStandard Deviation for each column:\n")
+
+print(std_deviation_values)
+
+cat("\nImpurity values for each column:\n")
+
+print(impurity_values)
+
