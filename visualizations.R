@@ -88,3 +88,62 @@ cat("\nImpurity values for each column:\n")
 
 print(impurity_values)
 
+
+
+# Calculate Quartile Range for Each Column in clean_data
+
+quartile_ranges <- sapply(clean_data, function(col) {
+  q <- quantile(col, probs = c(0.25, 0.75), na.rm = TRUE)
+  iqr <- q[2] - q[1]
+  return(iqr)
+})
+
+# Print Quartile Ranges
+
+cat("Quartile Ranges for each column:\n")
+print(quartile_ranges)
+
+
+#Information gain
+
+# Remove rows with missing values in 'bmi' and 'smoking_status' columns
+
+clean_data_no_na <- clean_data[!is.na(clean_data$bmi) & !is.na(clean_data$smoking_status), ]
+
+# Function to calculate information gain
+
+calculate_information_gain <- function(data, target_variable) {
+  info_gain <- sapply(names(data), function(feature) {
+    if (feature != target_variable) {
+      # Calculate entropy of the entire dataset
+      
+      entropy_full <- entropy(data[[target_variable]])
+      
+      # Calculate entropy after splitting by the current feature
+      
+      entropy_split <- sapply(unique(data[[feature]]), function(category) {
+        subset_data <- data[data[[feature]] == category, ]
+        proportion <- nrow(subset_data) / nrow(data)
+        entropy(subset_data[[target_variable]]) * proportion
+      })
+      
+      # Calculate information gain
+      
+      information_gain <- entropy_full - sum(entropy_split, na.rm = TRUE)
+      return(information_gain)
+    }
+  })
+  return(info_gain)
+}
+
+# Calculate information gain for each feature in clean_data with missing values removed
+
+information_gains_no_na <- calculate_information_gain(clean_data_no_na, "stroke")
+
+# Print information gains for each feature
+
+cat("Information Gain for each feature (after removing NA values):\n")
+
+print(information_gains_no_na)
+
+
