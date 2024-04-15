@@ -147,3 +147,56 @@ cat("Information Gain for each feature (after removing NA values):\n")
 print(information_gains_no_na)
 
 
+
+# Visualizing the input
+
+
+# BMI Distribution Density Plot
+
+ggplot(clean_data, aes(x = bmi)) + geom_density(color = "black", fill = "lightblue") + labs(title = "Distribution of BMI") 
+
+# Gender Distribution Bar Plot
+
+ggplot(data, aes(x = factor(gender), fill = factor(gender))) + geom_bar() + theme_classic()
+
+# Age and BMI wrt Stroke Scatter Plot
+
+ggplot(clean_data, aes(x = age, y = bmi, color = stroke)) + geom_point() + scale_color_gradient(low = "lightblue", high = "red")
+
+
+
+# Avg Glucose Level with stroke boxplot
+
+ggplot(clean_data, aes(x = stroke, y = avg_glucose_level, group = stroke, fill = stroke)) + geom_boxplot()
+glimpse(clean_data)
+
+
+
+par(las = 2)
+par(las=1)
+par(mar = c(5, 9, 4, 4))  
+
+correlation_df <- data.frame(variable = names(correlations), correlation = correlations)
+
+correlation_df$variable <- ifelse(correlation_df$variable == "avg_glucose_level", "avg_glucose", correlation_df$variable)
+barplot(correlation_df$correlation, names.arg = correlation_df$variable, col = ifelse(correlation_df$correlation > 0, "blue", "lightcoral"), horiz = TRUE, main = "Correlation with Stroke", xlab = "Correlation Coefficient", ylab = "",xlim = c(0, 1),border = NA)
+abline(v = 0, col = "black", lty = 1, lwd = 2)
+
+mtext("Variables", side = 2, line = 7.5, at = 5, cex = 1,las = 3)
+
+legend("topright", legend = c("Positive", "Negative"), fill = c("blue", "lightcoral"))
+
+with(clean_data, {
+  colors <- ifelse(stroke == 1, "red", "blue")  # Assuming stroke = 1 for stroke cases and 0 for non-stroke cases
+  scatterplot3d(
+    x = age,  y = hypertension, z = avg_glucose_level,
+    color = colors,
+    main = "Stroke Prediction Scatterplot",
+    xlab = "Age", ylab = "Hypertension", zlab = "Average Glucose Level",
+    xlim = c(min(age), max(age)),
+    ylim = c(0, 1), # Assuming hypertension is a binary variable (0 or 1)
+    zlim = c(min(avg_glucose_level), max(avg_glucose_level))
+  )
+})
+
+
