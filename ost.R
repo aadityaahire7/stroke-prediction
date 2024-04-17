@@ -123,6 +123,26 @@ model %>%
   layer_lstm(units = 50) %>%
   layer_dense(units = 1, activation = "sigmoid")
 
+
+# Prepare data for LSTM
+sequence_length <- 10
+n_features <- ncol(train_data) - 1  # Number of features, excluding the target variable
+
+# Initialize x_train and y_train with the correct dimensions
+x_train <- array(0, dim = c(nrow(train_data) - sequence_length + 1, sequence_length, n_features))
+y_train <- rep(0, length = nrow(train_data) - sequence_length + 1)
+
+# Populate x_train and y_train
+for (i in 1:(nrow(train_data) - sequence_length + 1)) {
+  x_train[i,,] <- as.matrix(train_data[i:(i + sequence_length - 1), -10])  # Use all features (excluding the target variable)
+  y_train[i] <- train_data[i + sequence_length - 1, 10]
+}
+
+# Initialize x_test and y_test with the correct dimensions
+x_test <- array(0, dim = c(nrow(test_data) - sequence_length + 1, sequence_length, n_features))
+y_test <- rep(0, length = nrow(test_data) - sequence_length + 1)
+
+
 # Load additional libraries
 library(keras)
 
