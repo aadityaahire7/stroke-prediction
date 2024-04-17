@@ -142,6 +142,50 @@ for (i in 1:(nrow(train_data) - sequence_length + 1)) {
 x_test <- array(0, dim = c(nrow(test_data) - sequence_length + 1, sequence_length, n_features))
 y_test <- rep(0, length = nrow(test_data) - sequence_length + 1)
 
+# Populate x_test and y_test
+for (i in 1:(nrow(test_data) - sequence_length + 1)) {
+  x_test[i,,] <- as.matrix(test_data[i:(i + sequence_length - 1), -10])  # Use all features (excluding the target variable)
+  y_test[i] <- test_data[i + sequence_length - 1, 10]
+}
+model %>% compile(
+  loss = "binary_crossentropy",
+  optimizer = optimizer_adam(learning_rate = 0.001491),
+  metrics = "accuracy"
+)
+# Train the model
+model %>% fit(x_train, y_train, epochs = 20, batch_size = 32)
+# Evaluate the model on the test data
+# Evaluate the model on the test data
+evaluation <- model %>% evaluate(x_test, y_test)
+
+# Extract the accuracy from the evaluation results
+accuracy <- evaluation[[2]]  # Assuming accuracy is the first metric
+
+# Print the accuracy percentage
+cat("Accuracy: ", accuracy * 100, "%\n")
+
+
+# Make predictions using the LSTM model
+lstm_predictions <- model %>% predict(x_test)
+
+
+
+# Check the dimensions of prediction vectors
+dim(lstm_predictions)
+ensemble_predictions <- (lstm_predictions + predictions) / 2
+
+
+threshold <- 0.699
+
+# 3. Calculate accuracy
+ensemble_predictions_binary <- ifelse(ensemble_predictions > threshold, 1, 0)
+true_labels <- test_data[(sequence_length):nrow(test_data), "stroke"]
+
+# Calculate accuracy
+accuracy <- mean(ensemble_predictions_binary == true_labels)
+
+# Print the accuracy
+cat("Ensemble Model Accuracy: ", accuracy * 100, "%\n")
 
 # Load additional libraries
 library(keras)
