@@ -105,6 +105,11 @@ index <- createDataPartition(clean_data$stroke, p = 0.8, list = FALSE)
 train_data <- clean_data[index, ]
 test_data <- clean_data[-index, ]
 
+# Normalize numerical features
+scaler <- preProcess(train_data[c("age", "avg_glucose_level", "bmi")], method = c("center", "scale"))
+train_data[c("age", "avg_glucose_level", "bmi")] <- predict(scaler, train_data[c("age", "avg_glucose_level", "bmi")])
+test_data[c("age", "avg_glucose_level", "bmi")] <- predict(scaler, test_data[c("age", "avg_glucose_level", "bmi")])
+
 
 # Load additional libraries
 library(keras)
