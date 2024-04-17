@@ -110,6 +110,18 @@ scaler <- preProcess(train_data[c("age", "avg_glucose_level", "bmi")], method = 
 train_data[c("age", "avg_glucose_level", "bmi")] <- predict(scaler, train_data[c("age", "avg_glucose_level", "bmi")])
 test_data[c("age", "avg_glucose_level", "bmi")] <- predict(scaler, test_data[c("age", "avg_glucose_level", "bmi")])
 
+# Handle missing values (if any)
+train_data[is.na(train_data)] <- 0
+test_data[is.na(test_data)] <- 0
+# Update the input shape in your LSTM layer to match your data
+
+model <- keras_model_sequential()
+
+model %>%
+  layer_lstm(units = 50, input_shape = c(10, 9), return_sequences = TRUE) %>%
+  layer_lstm(units = 50, return_sequences = TRUE) %>%
+  layer_lstm(units = 50) %>%
+  layer_dense(units = 1, activation = "sigmoid")
 
 # Load additional libraries
 library(keras)
